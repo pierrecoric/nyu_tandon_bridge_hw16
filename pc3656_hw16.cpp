@@ -10,8 +10,10 @@ using namespace std;
 //Class definitions.
 class Frame;
 class Stack;
-class Vequtoreu;
 typedef Frame* framePtr;
+
+//Part 2.
+class Vequtoreu;
 
 //Prototypes of helpers functions.
 bool openBracket(char c);
@@ -361,7 +363,7 @@ bool stringStackCompare(string s, const Stack& src) {
     } else return false;
 }
 
-//Return true of the character is a whitespace.
+//Return true if the character is a whitespace.
 bool isWhiteSpace(char c) {
     if(c == ' ') {
         return true;
