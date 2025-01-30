@@ -15,6 +15,7 @@ bool openBracket(char c);
 bool closeBracket(char c);
 bool validPair(char a, char b);
 bool isWhiteSpace(char c);
+string getString();
 
 //Frame class.
 class Frame {
@@ -256,31 +257,14 @@ bool pascalCheck(ifstream& ins) {
 int main() {
     Stack s;
     ifstream file;
-    string filename = "test.txt";
+    cout << "Pascal validation program." << endl;
+    cout << "Please enter the name of the file that you wish to validate: ";
+    string filename = getString();
     file.open(filename);
     if(pascalCheck(file)) {
         cout << filename << " is valid." << endl;
     }
     file.close();
-    /*
-    //Prompt whether the user wants to input a file.
-    char ans;
-    cout << "Pascal validation program" << endl;
-    cout << "Do you wish to input a file? Yes/No: ";
-    cin >> ans;
-    if(ans != 'y' && ans != 'Y') {
-        cout << endl << "Ok, enterring keyboard mode then." << endl;
-        cout << "Type in your Pascal Program. stop input using your system dedicated key";
-        cout << "Linux/Mac: Ctrl+D" << endl << "Windows: Ctrl+Z then Enter" << endl << endl;
-        pascalCheck(file);
-    } 
-    
-    else cout << "cool" << endl;
-    //Keyboard logic.
-    //pascalCheck(cin, s);
-    cout << s << endl;
-    */
-
     return 0;
 }
 
@@ -355,7 +339,7 @@ bool stringStackCompare(string s, const Stack& src) {
     } else return false;
 }
 
-
+//Return true of the character is a whitespace.
 bool isWhiteSpace(char c) {
     if(c == ' ') {
         return true;
@@ -366,4 +350,17 @@ bool isWhiteSpace(char c) {
     else if(c == '\t') {
         return true;
     } else return false;
+}
+
+//Helper function to get a string from the user.
+string getString() {
+    string s;
+    char ans = '\0';
+    while(ans != '\n') {
+        cin.get(ans);
+        if(ans != '\n') {
+            s += ans;
+        }
+    }
+    return s;
 }
