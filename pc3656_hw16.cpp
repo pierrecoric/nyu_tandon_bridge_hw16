@@ -153,7 +153,7 @@ framePtr Stack::pop() {
     temp = top;
     top = top -> next;
     delete temp;
-
+    size --;
     return result;
 }
 
