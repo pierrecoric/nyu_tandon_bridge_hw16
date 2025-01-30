@@ -2,6 +2,7 @@
 //hw-16 Stacks and Queues.
 
 #include <iostream>
+#include<fstream>
 #include <vector>
 using namespace std;
 
@@ -58,8 +59,8 @@ class Stack {
         //Copy constructor definition.
         Stack(const Stack& original);
         //Destructor.
-        //~Stack() {clear();}
-        //void clear();
+        ~Stack() {clear();}
+        void clear();
         bool empty() const {return size == 0;}
         //Push a new frame.
         void push(framePtr& f);
@@ -70,7 +71,7 @@ class Stack {
         //Overloading <<.
         friend ostream& operator <<(ostream& outs, const Stack& s);
         friend istream& operator >>(istream& ins, Stack& s);
-        friend bool pascalCheck(const Stack& s);
+        friend bool pascalCheck(istream& ins, Stack& s);
         friend class Frame;
 };
 
@@ -103,6 +104,14 @@ Stack::Stack(const Stack& original) {
 }
 
 //Clear function.
+void Stack::clear() {
+    while(top != nullptr) {
+        framePtr temp;
+        temp = top;
+        top = top -> next;
+        delete temp;
+    }
+}
 
 //Pushing a new frame.
 void Stack::push(framePtr& f) {
@@ -132,6 +141,21 @@ void Stack::push(char c) {
 }
 
 //Poping from the stack.
+framePtr Stack::pop() {
+    if(empty()) {
+        cout << "Error: popping from an empty stack." << endl;
+        exit(1);
+    }
+    //Create a new frame to return the result.
+    framePtr result = new Frame(top -> data);
+    //Create a temporary frame to delete the top frame.
+    framePtr temp;
+    temp = top;
+    top = top -> next;
+    delete temp;
+
+    return result;
+}
 
 //Function to print the stack.
 void Stack::print() const {
@@ -160,6 +184,16 @@ istream& operator >>(istream& ins, Stack& s) {
     return ins;
 }
 
+bool pascalCheck(istream& ins, Stack& s) {
+    char next;
+    
+    while(ins >> next) {
+        cout << next;
+    }
+    
+    return false;
+}
+
 //Main function.
 int main() {
     Stack s;
@@ -178,5 +212,6 @@ int main() {
     cout << endl << s << endl;
     Stack t(s);
     cout << endl << t << endl;
+    pascalCheck(cin, t);
     return 0;
 }
