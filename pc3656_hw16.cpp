@@ -4,11 +4,17 @@
 #include <iostream>
 #include<fstream>
 #include <vector>
+#include <string>
 using namespace std;
 
 class Frame;
 class Stack;
 typedef Frame* framePtr;
+
+bool openBracket(char c);
+bool closeBracket(char c);
+bool validPair(char a, char b);
+bool isWhiteSpace(char c);
 
 //Frame class.
 class Frame {
@@ -71,7 +77,8 @@ class Stack {
         //Overloading <<.
         friend ostream& operator <<(ostream& outs, const Stack& s);
         friend istream& operator >>(istream& ins, Stack& s);
-        friend bool pascalCheck(istream& ins, Stack& s);
+        friend bool stringStackCompare(string s, const Stack& src);
+        friend bool pascalCheck(ifstream& ins);
         friend class Frame;
 };
 
@@ -184,34 +191,179 @@ istream& operator >>(istream& ins, Stack& s) {
     return ins;
 }
 
-bool pascalCheck(istream& ins, Stack& s) {
+bool pascalCheck(ifstream& ins) {
     char next;
-    
-    while(ins >> next) {
-        cout << next;
+    bool recordBegin(true);
+    Stack brackets, begin, end;
+
+    while(ins.get(next)) {
+        //Start by checking that the begining is correct.
+        if(recordBegin) {
+            begin.push(next);
+        }
+        if(isWhiteSpace(next) || closeBracket(next) || openBracket(next)) {
+            recordBegin = false;
+        }
+        //If Closing symbol.
+        if(closeBracket(next)) {
+            if(brackets.empty()) {
+                cout << "Invalid: bracket closing on nothing." << endl;
+                return false;
+            }
+            else {
+                framePtr compare = new Frame;
+                compare = brackets.pop();
+                //If poping brackets result in an empty stack, it might be the beginning of the end.
+                if(brackets.empty()) {
+                    end.clear();
+                }
+                if(!validPair(compare -> getData(), next)) {
+                    cout << "Invalid: wrong bracket pair." << endl;
+                    return false;
+                }
+            }
+        }
+        else if(openBracket(next)) {
+            brackets.push(next);
+        }
+        //When we are out of brackets, listen for the end.
+        if(brackets.empty()) {
+            end.push(next);
+        }
     }
-    
-    return false;
+
+    //If we are done reading and the brackets stack is empty:
+    if(brackets.empty()) {
+        //If the last word is end
+        if (!stringStackCompare("begin", begin)) {
+            cout << "Invalid. The file does not begin with \"begin\"." << endl;
+            return false;
+        }
+        if (!stringStackCompare("end", end)) {
+            cout << "Invalid. The file does not end with \"end\"." << endl;
+            return false;
+        }
+        else return true;
+    }
+    else {
+        cout << "Invalid: open bracket(s) left unclosed" << endl;
+        return false;
+    }
 }
+
 
 //Main function.
 int main() {
     Stack s;
-    framePtr f = new Frame('X');
-    s.push(f);
-    framePtr x = new Frame('s');
-    s.push(x);
-    s.print();
-    s.push('p');
-    s.push('e');
-    cout << endl << s << endl;
-    char ans('\0');
-    cin >> s;
-    cin >> s;
-    cin >> s;
-    cout << endl << s << endl;
-    Stack t(s);
-    cout << endl << t << endl;
-    pascalCheck(cin, t);
+    ifstream file;
+    string filename = "test.txt";
+    file.open(filename);
+    if(pascalCheck(file)) {
+        cout << filename << " is valid." << endl;
+    }
+    file.close();
+    /*
+    //Prompt whether the user wants to input a file.
+    char ans;
+    cout << "Pascal validation program" << endl;
+    cout << "Do you wish to input a file? Yes/No: ";
+    cin >> ans;
+    if(ans != 'y' && ans != 'Y') {
+        cout << endl << "Ok, enterring keyboard mode then." << endl;
+        cout << "Type in your Pascal Program. stop input using your system dedicated key";
+        cout << "Linux/Mac: Ctrl+D" << endl << "Windows: Ctrl+Z then Enter" << endl << endl;
+        pascalCheck(file);
+    } 
+    
+    else cout << "cool" << endl;
+    //Keyboard logic.
+    //pascalCheck(cin, s);
+    cout << s << endl;
+    */
+
     return 0;
+}
+
+
+bool openBracket(char c) {
+    string valid = "({[";
+    for(int i = 0; i < valid.size(); i++) {
+        if(c == valid[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool closeBracket(char c) {
+    string valid = "]})";
+    for(int i = 0; i < valid.size(); i++) {
+        if(c == valid[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool validPair(char a, char b) {
+    if(a == '{' && b == '}') {
+        return true;
+    }
+    else if(a == '[' && b == ']') {
+        return true;
+    }
+    else if(a == '(' && b == ')') {
+        return true;
+    } else return false;
+}
+
+//Return true if the end of the stack matches the string.
+bool stringStackCompare(string s, const Stack& src) {
+    int stringPosition = s.size() - 1;
+    bool start(false);
+    bool doneReading(false);
+    //reading the stack.
+    framePtr current = new Frame;
+    current = src.top;
+
+    //Going down the stack.
+    while(current != nullptr) {
+        char currentChar = current -> getData();
+        if(!isWhiteSpace(currentChar)) {
+            start = true;
+        }
+        if(start) {
+            //When we have reached the end of the string.
+            if(doneReading) {
+                if(isWhiteSpace(currentChar)) {
+                    return true;
+                } else return false;
+            }
+            //if there is a mismatch.
+            if (currentChar != s[stringPosition]) {
+                return false;
+            }
+            if(stringPosition > 0) {
+                stringPosition --;
+            } else doneReading = true;
+        }
+        //Move to the next frame.
+        current = current -> getNext();
+    }
+    if(stringPosition == 0) {
+        return true;
+    } else return false;
+}
+
+
+bool isWhiteSpace(char c) {
+    if(c == ' ') {
+        return true;
+    } 
+    else if(c == '\n') {
+        return true;
+    }
+    else if(c == '\t') {
+        return true;
+    } else return false;
 }
