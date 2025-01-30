@@ -192,6 +192,9 @@ istream& operator >>(istream& ins, Stack& s) {
     return ins;
 }
 
+//Return true if the input file starts with begin, ends with end, and is made out of valid series of brackets.
+//If returning false, it tells the user which mistake it encountered.
+//It prints out the file as it reads it until encountering a mistake, so the user can locate it easily.
 bool pascalCheck(ifstream& ins) {
     char next;
     bool recordBegin(true);
@@ -199,16 +202,21 @@ bool pascalCheck(ifstream& ins) {
 
     while(ins.get(next)) {
         //Start by checking that the begining is correct.
+        cout << next;
         if(recordBegin) {
             begin.push(next);
         }
         if(isWhiteSpace(next) || closeBracket(next) || openBracket(next)) {
             recordBegin = false;
+            if (!stringStackCompare("begin", begin)) {
+                cout << endl << "Invalid. The file does not begin with \"begin\"." << endl;
+                return false;
+            }
         }
         //If Closing symbol.
         if(closeBracket(next)) {
             if(brackets.empty()) {
-                cout << "Invalid: bracket closing on nothing." << endl;
+                cout << endl << "Invalid: bracket closing on nothing." << endl;
                 return false;
             }
             else {
@@ -219,7 +227,7 @@ bool pascalCheck(ifstream& ins) {
                     end.clear();
                 }
                 if(!validPair(compare -> getData(), next)) {
-                    cout << "Invalid: wrong bracket pair." << endl;
+                    cout << endl << "Invalid: wrong bracket pair." << endl;
                     return false;
                 }
             }
@@ -234,24 +242,19 @@ bool pascalCheck(ifstream& ins) {
     }
 
     //If we are done reading and the brackets stack is empty:
-    if(brackets.empty()) {
-        //If the last word is end
-        if (!stringStackCompare("begin", begin)) {
-            cout << "Invalid. The file does not begin with \"begin\"." << endl;
-            return false;
-        }
+    if(!brackets.empty()) {
+        cout << endl << "Invalid: open bracket(s) left unclosed" << endl;
+        return false;
+    }
+    else {
+        //If the last word is not end
         if (!stringStackCompare("end", end)) {
-            cout << "Invalid. The file does not end with \"end\"." << endl;
+            cout << endl << "Invalid. The file does not end with \"end\"." << endl;
             return false;
         }
         else return true;
     }
-    else {
-        cout << "Invalid: open bracket(s) left unclosed" << endl;
-        return false;
-    }
 }
-
 
 //Main function.
 int main() {
@@ -260,6 +263,8 @@ int main() {
     cout << "Pascal validation program." << endl;
     cout << "Please enter the name of the file that you wish to validate: ";
     string filename = getString();
+    //Check that the file exists.
+    cout << endl;
     file.open(filename);
     if(pascalCheck(file)) {
         cout << filename << " is valid." << endl;
@@ -268,7 +273,7 @@ int main() {
     return 0;
 }
 
-
+//Return true if the variable is an opening bracket.
 bool openBracket(char c) {
     string valid = "({[";
     for(int i = 0; i < valid.size(); i++) {
@@ -279,6 +284,7 @@ bool openBracket(char c) {
     return false;
 }
 
+//Return true if variable is a closing bracket.
 bool closeBracket(char c) {
     string valid = "]})";
     for(int i = 0; i < valid.size(); i++) {
@@ -289,6 +295,7 @@ bool closeBracket(char c) {
     return false;
 }
 
+//Retur true if the parameters are matching brackets.
 bool validPair(char a, char b) {
     if(a == '{' && b == '}') {
         return true;
