@@ -110,5 +110,3 @@ void vqTest() {
     cout << vq.dequeue() << endl;
     cout << endl << vq << endl;
 }
-
-
