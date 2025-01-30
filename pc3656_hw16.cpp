@@ -7,10 +7,12 @@
 #include <string>
 using namespace std;
 
+//Class definitions.
 class Frame;
 class Stack;
 typedef Frame* framePtr;
 
+//Prototypes of helpers functions.
 bool openBracket(char c);
 bool closeBracket(char c);
 bool validPair(char a, char b);
@@ -43,7 +45,12 @@ class Frame {
 //Copy constructor for a frame.
 Frame::Frame(const Frame& f) {
     data = f.data;
-    next = f.next;
+    if(f.next != nullptr) {
+        next = new Frame(*f.next);
+    }
+    else {
+        next = nullptr;
+    }
 }
 
 //Overloading = operator for the Frame class..
@@ -58,8 +65,8 @@ Frame Frame::operator =(const Frame& other) {
 //Stack class
 class Stack {
     private:
-        int size;
         framePtr top;
+        int size;
     public:
         //Simple constructor.
         Stack() : top(nullptr), size(0) {};
@@ -73,7 +80,7 @@ class Stack {
         void push(framePtr& f);
         //Push a char directly.
         void push(char c);
-        framePtr pop();
+        Frame pop();
         void print() const;
         //Overloading <<.
         friend ostream& operator <<(ostream& outs, const Stack& s);
@@ -94,6 +101,7 @@ Stack::Stack(const Stack& original) {
         framePtr oldPtr = original.top;
         top = new Frame(oldPtr->data);
         top -> next = nullptr;
+        size ++;
 
         //Copy the rest.
         framePtr nextOne = top;
@@ -103,6 +111,7 @@ Stack::Stack(const Stack& original) {
             framePtr newOne = new Frame(oldPtr -> data);
             newOne -> next = nullptr;
             nextOne -> next = newOne;
+            size ++;
 
             //Move to the next node.
             nextOne = nextOne -> next;
@@ -149,13 +158,13 @@ void Stack::push(char c) {
 }
 
 //Poping from the stack.
-framePtr Stack::pop() {
+Frame Stack::pop() {
     if(empty()) {
         cout << "Error: popping from an empty stack." << endl;
         exit(1);
     }
     //Create a new frame to return the result.
-    framePtr result = new Frame(top -> data);
+    Frame result(top -> data);
     //Create a temporary frame to delete the top frame.
     framePtr temp;
     temp = top;
@@ -199,6 +208,7 @@ bool pascalCheck(ifstream& ins) {
     char next;
     bool recordBegin(true);
     Stack brackets, begin, end;
+    Frame compare;
 
     while(ins.get(next)) {
         //Start by checking that the begining is correct.
@@ -220,13 +230,12 @@ bool pascalCheck(ifstream& ins) {
                 return false;
             }
             else {
-                framePtr compare = new Frame;
                 compare = brackets.pop();
                 //If poping brackets result in an empty stack, it might be the beginning of the end.
                 if(brackets.empty()) {
                     end.clear();
                 }
-                if(!validPair(compare -> getData(), next)) {
+                if(!validPair(compare.getData(), next)) {
                     cout << endl << "Invalid: wrong bracket pair." << endl;
                     return false;
                 }
@@ -258,7 +267,6 @@ bool pascalCheck(ifstream& ins) {
 
 //Main function.
 int main() {
-    Stack s;
     ifstream file;
     cout << "Pascal validation program." << endl;
     cout << "Please enter the name of the file that you wish to validate: ";
