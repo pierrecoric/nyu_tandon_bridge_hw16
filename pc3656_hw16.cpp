@@ -10,6 +10,7 @@ using namespace std;
 //Class definitions.
 class Frame;
 class Stack;
+class Vequtoreu;
 typedef Frame* framePtr;
 
 //Prototypes of helpers functions.
@@ -18,6 +19,9 @@ bool closeBracket(char c);
 bool validPair(char a, char b);
 bool isWhiteSpace(char c);
 string getString();
+
+//Function to test part2
+void vqTest();
 
 //Frame class.
 class Frame {
@@ -278,6 +282,7 @@ int main() {
         cout << filename << " is valid." << endl;
     }
     file.close();
+    vqTest();
     return 0;
 }
 
@@ -378,4 +383,99 @@ string getString() {
         }
     }
     return s;
+}
+
+
+
+//Part 2 a class that uses a vector to store a queue.
+class Vequtoreu {
+    private:
+        vector<int> Q;
+        int startPos;
+    public:
+        //Simple constructor
+        Vequtoreu();
+        //Copy constructor
+        Vequtoreu(Vequtoreu& vq);
+        //Destructor
+        ~Vequtoreu() {};
+        //Insert at the end.
+        void insert(int n);
+        //Remove from the front.
+        int dequeue();
+        //Return true if the Vequtoreu is empty.
+        bool empty() {return Q.size() == 0;}
+        //Return the size.
+        int getSize() {return Q.size();}
+        //Prints out the whole thing.
+        void print();
+        //Overloading << to output the queue.
+        friend ostream& operator <<(ostream& outs, const Vequtoreu& vq);
+};
+
+//Simple constructor.
+Vequtoreu::Vequtoreu() {
+    Q.clear();
+    startPos = 0;
+}
+//Copy constructor.
+
+//Insert at the end.
+void Vequtoreu::insert(int n) {
+    if(empty()) {
+        startPos = 0;
+    }
+    Q.push_back(n);
+}
+
+//Remove from the front.
+int Vequtoreu::dequeue() {
+    if(empty()) {
+        cout << "Error dequeuing and empty queue" << endl;
+        exit(1);
+    }
+    int result = Q[startPos];
+    startPos ++;
+    if(startPos == Q.size()) {
+        Q.clear();
+    }
+    return result;
+}
+
+//Print out the whole queue.
+void Vequtoreu::print() {
+    for(int i = startPos; i < Q.size(); i++) {
+        cout << Q[i];
+    }
+}
+
+//Overloading of << for the Vequtoreu class.
+ostream& operator <<(ostream& outs, const Vequtoreu& vq) {
+    outs << "[";
+    for(int i = vq.startPos; i < vq.Q.size(); i++) {
+        outs << vq.Q[i];
+        if(i < vq.Q.size() - 1) {
+            outs << ", ";
+        }
+    }
+    cout << "]";
+    return outs;
+}
+
+void vqTest() {
+    Vequtoreu vq;
+    vq.insert(12);
+    vq.insert(20);
+    cout << vq.dequeue();
+    cout << vq.dequeue();
+    vq.print();
+    vq.insert(20);
+    vq.insert(21);
+    vq.insert(22);
+    vq.insert(23);
+    vq.insert(24);
+    vq.insert(25);
+    vq.insert(26);
+
+    cout << endl << vq << endl;
 }
